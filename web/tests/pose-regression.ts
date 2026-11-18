@@ -1,0 +1,12 @@
+import * as THREE from 'three';
+import {poseBranch} from '../src/pose';
+import {starter} from '../src/starters';
+const {joints,edges}=starter('stick');
+const before=JSON.stringify(joints),posed=poseBranch(joints,edges,3,new THREE.Vector3(-.2,1,0));
+if(!posed||JSON.stringify(joints)!==before)throw Error('Pose mutated source');
+const distance=(a:typeof joints[0],b:typeof joints[0])=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+for(const [a,b] of edges)if(Math.abs(distance(joints[a],joints[b])-distance(posed[a],posed[b]))>1e-6)throw Error('Bone length changed');
+if(Math.hypot(posed[4].x-joints[4].x,posed[4].y-joints[4].y,posed[4].z-joints[4].z)<.01)throw Error('Child did not follow');
+if(distance(posed[5],joints[5])>1e-6)throw Error('Unrelated branch moved');
+if(poseBranch(joints,edges,0,new THREE.Vector3(1,1,0))!==null)throw Error('Root has no pivot');
+console.log('Pose preserves lengths, moves descendants, and leaves other branches untouched');
