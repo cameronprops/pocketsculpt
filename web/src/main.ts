@@ -1,0 +1,62 @@
+import * as THREE from 'three';
+import {buildMesh,type Joint,type Edge} from './mesh';
+import './style.css';
+const app=document.querySelector<HTMLDivElement>('#app')!;
+app.innerHTML=`<canvas id="scene"></canvas><header><strong>POCKET SCULPT</strong><small>Creature Builder · Web 0.6.1</small><div class="head"><button id="undo">Undo</button><button id="save">Save</button><button id="obj">OBJ</button></div></header><aside><label>Joint radius <output id="radiusValue">0.30</output></label><input id="radius" type="range" min=".06" max=".7" step=".01"><label>Surface detail</label><select id="detail"><option value=".23">Low · fast</option><option value=".17" selected>Medium</option><option value=".12">High</option></select><label><input id="mirror" type="checkbox" checked> Mirror new limbs</label><button id="body">Hide body</button><button id="resetView">Reset view</button><button id="open">Open project</button><button id="reset">Reset creature</button><input id="file" type="file" accept="application/json,.json" hidden></aside><div id="hint">Tap joint to select. Drag to move.<br>Two fingers to orbit and zoom.<br>Add: select parent, tap empty space.</div><footer><button data-mode="move" class="active">Move</button><button data-mode="add">Add limb</button><button data-mode="delete">Delete</button><button data-mode="orbit">Orbit</button></footer><div id="status"></div>`;
+const $=<T extends HTMLElement=HTMLElement>(s:string)=>document.querySelector<T>(s)!;
+const canvas=$<HTMLCanvasElement>('#scene'),renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0x101923);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,.05,100);
+scene.add(new THREE.HemisphereLight(0xddeeff,0x314453,2));const light=new THREE.DirectionalLight(0xffffff,2.1);light.position.set(3,5,7);scene.add(light);
+const material=new THREE.MeshStandardMaterial({color:0x88b7ce,roughness:.85,side:THREE.DoubleSide});
+let bodyMesh:THREE.Mesh|null=null;const skeleton=new THREE.Group();scene.add(skeleton);
+let joints:Joint[]=[],edges:Edge[]=[],next=0,selected=0,mode='move',showBody=true,dirty=true,yaw=.25,pitch=.08,zoom=5.5,history:string[]=[];
+let gesture:{x:number;y:number;dist:number}|null=null,drag:{kind:'joint'|'orbit';id?:number;plane?:THREE.Plane;origin?:string;moved?:boolean}|null=null;
+const pointers=new Map<number,{x:number;y:number}>(),raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+function initial(){next=0;joints=[];const j=(x:number,y:number,z:number,r:number)=>joints.push({id:next++,x,y,z,r});
+j(0,0,0,.34);j(0,.75,0,.29);j(0,1.22,0,.32);j(-.64,.65,0,.19);j(-1.15,.25,0,.13);j(.64,.65,0,.19);j(1.15,.25,0,.13);j(-.38,-.72,0,.24);j(-.48,-1.4,0,.14);j(.38,-.72,0,.24);j(.48,-1.4,0,.14);
+edges=[[0,1],[1,2],[1,3],[3,4],[1,5],[5,6],[0,7],[7,8],[0,9],[9,10]];selected=0;sync()}
+const get=(id:number)=>joints.find(j=>j.id===id),snap=()=>JSON.stringify({joints,edges,next,selected});
+function persist(){try{localStorage.setItem('pocket-sculpt-web-v06',snap())}catch{}}
+function restore(s:string){
+ const d:unknown=JSON.parse(s);if(!d||typeof d!=='object')throw Error('Invalid project');
+ const v=d as {joints?:unknown;edges?:unknown;selected?:unknown};
+ if(!Array.isArray(v.joints)||!Array.isArray(v.edges)||v.joints.length<1||v.joints.length>500||v.edges.length>1000)throw Error('Invalid project size');
+ if(!v.joints.every((j:unknown)=>{if(!j||typeof j!=='object')return false;const a=j as Record<string,unknown>;return ['x','y','z','r','id'].every(k=>typeof a[k]==='number'&&Number.isFinite(a[k]))&&Number.isSafeInteger(a.id)&&Number(a.id)>=0&&Number(a.r)>=.01&&Number(a.r)<=10&&['x','y','z'].every(k=>Math.abs(Number(a[k]))<=100)}))throw Error('Invalid joint data');
+ const newJoints=v.joints as Joint[],ids=new Set(newJoints.map(j=>j.id));if(ids.size!==newJoints.length)throw Error('Duplicate joint IDs');
+ if(!v.edges.every((e:unknown)=>Array.isArray(e)&&e.length===2&&e.every(id=>Number.isSafeInteger(id)&&ids.has(id))&&e[0]!==e[1]))throw Error('Invalid bones');
+ joints=newJoints;edges=v.edges as Edge[];next=Math.max(...newJoints.map(j=>j.id))+1;selected=typeof v.selected==='number'&&ids.has(v.selected)?v.selected:newJoints[0].id;sync();
+}
+function checkpoint(){history.push(snap());if(history.length>60)history.shift()}
+function sync(){const j=get(selected);$<HTMLInputElement>('#radius').value=String(j?.r??.3);$('#radiusValue').textContent=(j?.r??0).toFixed(2);$('#status').textContent=`${joints.length} joints · ${edges.length} bones`;dirty=true;persist()}
+function rebuild(){
+ if(bodyMesh){scene.remove(bodyMesh);bodyMesh.geometry.dispose();bodyMesh=null}
+ if(showBody)try{bodyMesh=new THREE.Mesh(buildMesh(joints,edges,Number($<HTMLSelectElement>('#detail').value)),material);scene.add(bodyMesh);$('#status').textContent=`${joints.length} joints · ${bodyMesh.geometry.getAttribute('position').count} vertices`}catch(e){$('#status').textContent=String(e)}
+ while(skeleton.children.length){const o=skeleton.children[0] as THREE.Mesh;skeleton.remove(o);o.geometry.dispose()}
+ const ball=new THREE.SphereGeometry(1,10,8),jointMat=new THREE.MeshBasicMaterial({color:0x9fe8ff,depthTest:false}),selMat=new THREE.MeshBasicMaterial({color:0xffcb82,depthTest:false});
+ for(const j of joints){const m=new THREE.Mesh(ball.clone(),j.id===selected?selMat:jointMat);m.position.set(j.x,j.y,j.z);m.scale.setScalar(j.id===selected?.085:.06);m.userData.jointId=j.id;m.renderOrder=3;skeleton.add(m)}ball.dispose();
+ const boneMat=new THREE.LineBasicMaterial({color:0x4ccbf0,depthTest:false});
+ for(const [a,b] of edges){const A=get(a),B=get(b);if(!A||!B)continue;const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(A.x,A.y,A.z),new THREE.Vector3(B.x,B.y,B.z)]);const line=new THREE.Line(geo,boneMat);line.renderOrder=2;skeleton.add(line)}
+ dirty=false;
+}
+function updateCamera(){camera.position.set(Math.sin(yaw)*Math.cos(pitch)*zoom,Math.sin(pitch)*zoom,Math.cos(yaw)*Math.cos(pitch)*zoom);camera.lookAt(0,0,0);camera.updateMatrixWorld()}
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+function ndc(x:number,y:number){pointer.set(x/innerWidth*2-1,1-y/innerHeight*2);raycaster.setFromCamera(pointer,camera)}
+function pick(x:number,y:number){ndc(x,y);const hits=raycaster.intersectObjects(skeleton.children.filter(o=>o instanceof THREE.Mesh),false);return hits.length?get(hits[0].object.userData.jointId):null}
+function worldOnPlane(x:number,y:number,plane:THREE.Plane){ndc(x,y);return raycaster.ray.intersectPlane(plane,new THREE.Vector3())}
+function add(x:number,y:number){const parent=get(selected);if(!parent)return;const plane=new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()),new THREE.Vector3(parent.x,parent.y,parent.z));const p=worldOnPlane(x,y,plane);if(!p)return;checkpoint();const j={id:next++,x:p.x,y:p.y,z:p.z,r:parent.r*.72};joints.push(j);edges.push([parent.id,j.id]);if($<HTMLInputElement>('#mirror').checked&&Math.abs(parent.x)<.05&&Math.abs(p.x)>.08){const other={...j,id:next++,x:-p.x};joints.push(other);edges.push([parent.id,other.id])}selected=j.id;sync()}
+function remove(id:number){if(id===0)return;checkpoint();const ids=new Set([id]);let changed=true;while(changed){changed=false;for(const [a,b] of edges)if(ids.has(a)&&!ids.has(b)){ids.add(b);changed=true}}joints=joints.filter(j=>!ids.has(j.id));edges=edges.filter(([a,b])=>!ids.has(a)&&!ids.has(b));selected=0;sync()}
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){drag=null;gesture=null;return}if(pointers.size>2)return;const j=pick(e.clientX,e.clientY);if(mode==='delete'){if(j)remove(j.id);return}if(mode==='add'){if(j){selected=j.id;sync()}else add(e.clientX,e.clientY);return}if(mode==='move'&&j){selected=j.id;sync();const plane=new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()),new THREE.Vector3(j.x,j.y,j.z));drag={kind:'joint',id:j.id,plane,origin:snap(),moved:false}}else drag={kind:'orbit'}});
+canvas.addEventListener('pointermove',e=>{const old=pointers.get(e.pointerId);if(!old)return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){const a=[...pointers.values()],x=(a[0].x+a[1].x)/2,y=(a[0].y+a[1].y)/2,dist=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(gesture){zoom=Math.max(2.4,Math.min(12,zoom*gesture.dist/Math.max(dist,1)));yaw+=(x-gesture.x)*.006;pitch=Math.max(-1.4,Math.min(1.4,pitch+(y-gesture.y)*.006))}gesture={x,y,dist};return}if(drag?.kind==='orbit'){yaw+=(e.clientX-old.x)*.008;pitch=Math.max(-1.4,Math.min(1.4,pitch+(e.clientY-old.y)*.008))}else if(drag?.kind==='joint'){const p=worldOnPlane(e.clientX,e.clientY,drag.plane!),j=get(drag.id!);if(p&&j){j.x=p.x;j.y=p.y;j.z=p.z;drag.moved=true;dirty=true}}});
+function finish(e:PointerEvent){if(drag?.kind==='joint'&&drag.moved){history.push(drag.origin!);dirty=true;persist()}pointers.delete(e.pointerId);drag=null;if(pointers.size<2)gesture=null}
+canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);
+document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode!;document.querySelectorAll('[data-mode]').forEach(v=>v.classList.toggle('active',v===b))});
+let radiusStart='';$<HTMLInputElement>('#radius').onpointerdown=()=>radiusStart=snap();$<HTMLInputElement>('#radius').oninput=e=>{const j=get(selected);if(j){j.r=Number((e.target as HTMLInputElement).value);$('#radiusValue').textContent=j.r.toFixed(2);dirty=true}};$<HTMLInputElement>('#radius').onchange=()=>{if(radiusStart&&radiusStart!==snap())history.push(radiusStart);radiusStart='';persist()};$<HTMLSelectElement>('#detail').onchange=()=>dirty=true;
+$('#body').onclick=()=>{showBody=!showBody;$('#body').textContent=showBody?'Hide body':'Show body';dirty=true};$('#resetView').onclick=()=>{yaw=.25;pitch=.08;zoom=5.5};$('#reset').onclick=()=>{if(confirm('Reset creature?')){checkpoint();initial()}};$('#undo').onclick=()=>{const s=history.pop();if(s)restore(s)};
+function download(name:string,content:string,type:string){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
+$('#save').onclick=()=>download('pocket-creature-v061.json',snap(),'application/json');
+$('#obj').onclick=()=>{try{const g=buildMesh(joints,edges,Number($<HTMLSelectElement>('#detail').value)),p=g.getAttribute('position'),ix=g.getIndex();let s='# Pocket Sculpt unified surface\n';for(let i=0;i<p.count;i++)s+=`v ${p.getX(i)} ${p.getY(i)} ${p.getZ(i)}\n`;if(ix)for(let i=0;i<ix.count;i+=3)s+=`f ${ix.getX(i)+1} ${ix.getX(i+1)+1} ${ix.getX(i+2)+1}\n`;g.dispose();download('pocket-creature-v061.obj',s,'text/plain')}catch(e){alert(String(e))}};
+$('#open').onclick=()=>$<HTMLInputElement>('#file').click();$<HTMLInputElement>('#file').onchange=async e=>{const f=(e.target as HTMLInputElement).files?.[0];if(!f)return;try{const content=await f.text(),previous=snap();restore(content);history.push(previous)}catch(err){alert(String(err))}(e.target as HTMLInputElement).value=''};
+window.addEventListener('resize',resize);resize();
+let restored=false;try{const saved=localStorage.getItem('pocket-sculpt-web-v06');if(saved){restore(saved);restored=true}}catch(e){console.warn('Could not restore saved creature:',e)}if(!restored)initial();
+function animate(){requestAnimationFrame(animate);updateCamera();if(dirty&&pointers.size===0)rebuild();renderer.render(scene,camera)}animate();
