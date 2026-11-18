@@ -16,11 +16,11 @@ Run `npm run build` to check TypeScript and create a production build.
 
 1. Move joints and add or remove branches. Symmetry mirrors edits when a matching joint can be found.
 2. Adjust joint radii and select surface detail. The body uses a lower-detail preview while a joint is dragged.
-3. Select **Start sculpting**, then use Build, Carve, or Smooth. Adjust brush size, strength, and symmetry.
-4. Save an editable JSON project or export an OBJ. Returning to the skeleton discards sculpted details after a warning; Undo can restore the previous state.
+3. Select **Start sculpting**, then use Build, Carve, Smooth, or Paint. Choose a paint color in the side panel. Adjust brush size, strength, and symmetry.
+4. Save an editable JSON project, including paint, or export an OBJ with per-vertex color. OBJ vertex colors are an extension and may not appear in every importer. Returning to the skeleton discards sculpted details after a warning; Undo can restore the previous state.
 
 Two fingers orbit and zoom. Use Orbit for one-finger navigation. Projects also autosave in the browser, subject to available browser storage; keep exported project backups.
 
 ## Known limitations
 
-Painting, posing after sculpting, additional brushes, and a complete 123D Creature workflow are not implemented. Symmetry identifies matching joints by position, so it is not a persistent explicit pairing and may not find previously asymmetric joints. Mesh generation and sculpting run on the main thread and have not been benchmarked on target phones. Exports are not verified print-ready. Phone touch usability and older iPad compatibility need device testing.
+Texture-map painting, posing after sculpting, additional brushes, and a complete 123D Creature workflow are not implemented. Symmetry identifies matching joints by position, so it is not a persistent explicit pairing and may not find previously asymmetric joints. Mesh generation and sculpting run on the main thread and have not been benchmarked on target phones. Exports are not verified print-ready. Phone touch usability and older iPad compatibility need device testing.
