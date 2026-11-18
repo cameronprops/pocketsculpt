@@ -9,7 +9,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "test:mesh": "node tests/run.mjs",
     "test:pose": "node tests/run-pose.mjs",
-    "test:tags": "node tests/run-tags.mjs"
+    "test:tags": "node tests/run-tags.mjs",
+    "test:parts": "node tests/run-parts.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"
