@@ -17,3 +17,12 @@ export function neighborsFor(g:THREE.BufferGeometry):number[][] {
   if(ix)for(let k=0;k<ix.count;k+=3){const a=ix.getX(k),b=ix.getX(k+1),c=ix.getX(k+2);result[a].push(b,c);result[b].push(a,c);result[c].push(a,b)}
   adjacency.set(g,result);return result;
 }
+
+/** Move a point toward the hit plane, including its mirrored counterpart. */
+export function flattenPoint(x:number,y:number,z:number,point:THREE.Vector3,normal:THREE.Vector3,mirror:boolean,amount:number):[number,number,number]{
+ const mirrored=mirror&&Math.hypot(x+point.x,y-point.y,z-point.z)<Math.hypot(x-point.x,y-point.y,z-point.z);
+ const px=mirrored?-point.x:point.x,nx=mirrored?-normal.x:normal.x;
+ const distance=(x-px)*nx+(y-point.y)*normal.y+(z-point.z)*normal.z;
+ const t=Math.max(0,Math.min(1,amount))*distance;
+ return [x-t*nx,y-t*normal.y,z-t*normal.z];
+}
