@@ -6,6 +6,7 @@ const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
 export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeometry{
  const byId=new Map(joints.map(j=>[j.id,j]));
  const links=edges.map(([a,b])=>[byId.get(a),byId.get(b)]).filter((e):e is [Joint,Joint]=>!!e[0]&&!!e[1]);
+ const linked=new Set(links.flatMap(([a,b])=>[a.id,b.id]));const isolated=joints.filter(j=>!linked.has(j.id));
  if(!joints.length)return new THREE.BufferGeometry();
  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
  for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k];lo[k]=Math.min(lo[k],v-j.r-.3);hi[k]=Math.max(hi[k],v+j.r+.3)}
@@ -13,14 +14,18 @@ export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeom
  if(nx*ny*nz>200000)throw Error('Mesh too large. Select lower detail.');
  const index=(i:number,j:number,k:number)=>(i*ny+j)*nz+k;
  const field=(x:number,y:number,z:number)=>{
-  let d=1e4;
-  const blend=(a:number,b:number,k:number)=>{const h=Math.max(k-Math.abs(a-b),0)/k;return Math.min(a,b)-h*h*k*.25};
+  // Blend the two closest distinct limbs only. Sequential blending of all
+  // joints and bones inflated busy intersections and depended on edge order.
+  let first=Infinity,second=Infinity;
+  function consider(d:number){if(d<first){second=first;first=d}else if(d<second)second=d}
   for(const [a,b] of links){const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z,den=dx*dx+dy*dy+dz*dz;
    const t=den?Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy+(z-a.z)*dz)/den)):0;
-   d=blend(d,Math.hypot(x-a.x-dx*t,y-a.y-dy*t,z-a.z-dz*t)-(a.r+(b.r-a.r)*t),.14);
+   consider(Math.hypot(x-a.x-dx*t,y-a.y-dy*t,z-a.z-dz*t)-(a.r+(b.r-a.r)*t));
   }
-  for(const j of joints)d=blend(d,Math.hypot(x-j.x,y-j.y,z-j.z)-j.r,.1);
-  return d;
+  for(const j of isolated)consider(Math.hypot(x-j.x,y-j.y,z-j.z)-j.r);
+  if(!Number.isFinite(second))return first;
+  const k=.14,h=Math.max(k-Math.abs(first-second),0)/k;
+  return first-h*h*k*.25;
  };
  const values=new Float32Array(nx*ny*nz);
  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++)values[index(i,j,k)]=field(lo[0]+i*step,lo[1]+j*step,lo[2]+k*step);
