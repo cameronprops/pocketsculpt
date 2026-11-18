@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-export type Joint={id:number;x:number;y:number;z:number;r:number};
+import type {JointTag} from './jointTags';
+export type Joint={id:number;x:number;y:number;z:number;r:number;tag?:JointTag};
 export type Edge=[number,number];
 const corners:[[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]]=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
 const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
