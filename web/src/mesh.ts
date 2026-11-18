@@ -8,10 +8,13 @@ export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeom
  const links=edges.map(([a,b])=>[byId.get(a),byId.get(b)]).filter((e):e is [Joint,Joint]=>!!e[0]&&!!e[1]);
  const linked=new Set(links.flatMap(([a,b])=>[a.id,b.id]));const isolated=joints.filter(j=>!linked.has(j.id));
  if(!joints.length)return new THREE.BufferGeometry();
+ if(!Number.isFinite(step)||step<=0||joints.some(j=>!Number.isFinite(j.r)||j.r<=0))throw Error('Invalid joint radius or surface detail.');
+ // Thin limbs need multiple samples across their diameter, including preview.
+ step=Math.min(step,Math.min(...joints.map(j=>j.r))*.75);
  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
  for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k];lo[k]=Math.min(lo[k],v-j.r-.3);hi[k]=Math.max(hi[k],v+j.r+.3)}
  const [nx,ny,nz]=lo.map((v,k)=>Math.ceil((hi[k]-v)/step)+1);
- if(nx*ny*nz>200000)throw Error('Mesh too large. Select lower detail.');
+ if(nx*ny*nz>700000)throw Error('The smallest joints are too thin for this model size. Increase their radius or shorten the model, then try again.');
  const index=(i:number,j:number,k:number)=>(i*ny+j)*nz+k;
  const field=(x:number,y:number,z:number)=>{
   // Blend the two closest distinct limbs only. Sequential blending of all
