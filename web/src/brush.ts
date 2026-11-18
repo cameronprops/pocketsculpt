@@ -26,3 +26,13 @@ export function flattenPoint(x:number,y:number,z:number,point:THREE.Vector3,norm
  const t=Math.max(0,Math.min(1,amount))*distance;
  return [x-t*nx,y-t*normal.y,z-t*normal.z];
 }
+
+/** Follow connected triangles around the hit rather than jumping to nearby shells. */
+export function brushRegion(g:THREE.BufferGeometry,face:{a:number;b:number;c:number},point:THREE.Vector3,normal:THREE.Vector3,radius:number,mirror:boolean):Uint8Array{
+ const p=g.getAttribute('position'),n=g.getAttribute('normal'),neighbors=neighborsFor(g),mask=new Uint8Array(p.count),queue:number[]=[];
+ function visit(seed:number){if(!mask[seed]){mask[seed]=1;queue.push(seed)}}
+ for(const v of [face.a,face.b,face.c])visit(v);
+ if(mirror&&Math.abs(point.x)>.001){let best=-1,dist=radius*radius;for(let i=0;i<p.count;i++){const dx=p.getX(i)+point.x,dy=p.getY(i)-point.y,dz=p.getZ(i)-point.z,d=dx*dx+dy*dy+dz*dz;if(d<dist&&-n.getX(i)*normal.x+n.getY(i)*normal.y+n.getZ(i)*normal.z>.1){best=i;dist=d}}if(best>=0)visit(best)}
+ for(let head=0;head<queue.length;head++){const i=queue[head];for(const v of neighbors[i]){if(mask[v])continue;const dy=p.getY(v)-point.y,dz=p.getZ(v)-point.z,dx=p.getX(v)-point.x,mdx=p.getX(v)+point.x;if(dx*dx+dy*dy+dz*dz<=radius*radius||(mirror&&mdx*mdx+dy*dy+dz*dz<=radius*radius))visit(v)}}
+ return mask;
+}
