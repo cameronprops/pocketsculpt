@@ -1,0 +1,27 @@
+name: Pocket Sculpt Web Build
+on:
+  push:
+    branches: [web-v0.6.1]
+    paths: ['web/**', '.github/workflows/web-build.yml']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        working-directory: web
+        run: npm install
+      - name: Typecheck and build
+        working-directory: web
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PocketSculpt-Web-v0.6.1
+          path: web/dist/
+          if-no-files-found: error
