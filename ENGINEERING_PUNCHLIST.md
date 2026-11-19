@@ -18,7 +18,7 @@ Derived from the supplied engineering brief. A checked item requires its stated 
 - [ ] P1-05: Sculpted wrinkles, folds, seams and silhouette without damage or unwanted inflation.
 
 ## Massing primitives and kitbashing
-- [x] Prototype model-axis aligned sphere and box node primitives, with per-node scale and project persistence.
+- [x] Prototype model-axis aligned sphere, box and cylinder node primitives, with per-node scale and project persistence.
 - [ ] Add rotation/local axes, selectable blend behavior, additional closed primitives and sharp-edge controls.
 - [ ] Validate complex assemblies, Boolean operations, export and Buildercraft interchange.
 

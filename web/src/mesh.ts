@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import type {NodeMetadata} from './nodeMetadata';
 import type {BallJoint} from './akeley';
 import type {JointTag} from './jointTags';
-export type Joint={id:number;x:number;y:number;z:number;r:number;shape?:'sphere'|'box';flatten?:number;scaleX?:number;scaleY?:number;scaleZ?:number;connector?:BallJoint;metadata?:NodeMetadata;tag?:JointTag};
+export type Joint={id:number;x:number;y:number;z:number;r:number;shape?:'sphere'|'box'|'cylinder';flatten?:number;scaleX?:number;scaleY?:number;scaleZ?:number;connector?:BallJoint;metadata?:NodeMetadata;tag?:JointTag};
 export type Edge=[number,number];
 const corners:[[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]]=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
 const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
 /** Model-axis aligned node primitive distance in normalized coordinates. */
-function primitiveDistance(x:number,y:number,z:number,r:number,shape:'sphere'|'box'):number{if(shape==='sphere')return Math.hypot(x,y,z)-r;const a=Math.abs(x)-r,b=Math.abs(y)-r,c=Math.abs(z)-r;return Math.hypot(Math.max(a,0),Math.max(b,0),Math.max(c,0))+Math.min(Math.max(a,b,c),0)}
+function primitiveDistance(x:number,y:number,z:number,r:number,shape:'sphere'|'box'|'cylinder'):number{if(shape==='sphere')return Math.hypot(x,y,z)-r;if(shape==='cylinder'){const a=Math.hypot(x,z)-r,b=Math.abs(y)-r;return Math.hypot(Math.max(a,0),Math.max(b,0))+Math.min(Math.max(a,b),0)}const a=Math.abs(x)-r,b=Math.abs(y)-r,c=Math.abs(z)-r;return Math.hypot(Math.max(a,0),Math.max(b,0),Math.max(c,0))+Math.min(Math.max(a,b,c),0)}
 export function makeBodyField(joints:Joint[],edges:Edge[]){
  const byId=new Map(joints.map(j=>[j.id,j]));
  const links=edges.map(([a,b])=>[byId.get(a),byId.get(b)]).filter((e):e is [Joint,Joint]=>!!e[0]&&!!e[1]);
