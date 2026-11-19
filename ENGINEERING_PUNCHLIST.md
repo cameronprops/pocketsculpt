@@ -19,7 +19,7 @@ Derived from the supplied engineering brief. A checked item requires its stated 
 
 ## Massing primitives and kitbashing
 - [x] Prototype model-axis aligned sphere, box and cylinder node primitives, with per-node scale and project persistence.
-- [ ] Add rotation/local axes, selectable blend behavior, additional closed primitives and sharp-edge controls.
+- [ ] Add full 3D rotation/local axes, selectable blend behavior, additional closed primitives and sharp-edge controls. A model-Z rotation control is available.
 - [ ] Validate complex assemblies, Boolean operations, export and Buildercraft interchange.
 
 ## P2: Extendable geometry

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type {NodeMetadata} from './nodeMetadata';
 import type {BallJoint} from './akeley';
 import type {JointTag} from './jointTags';
-export type Joint={id:number;x:number;y:number;z:number;r:number;shape?:'sphere'|'box'|'cylinder';flatten?:number;scaleX?:number;scaleY?:number;scaleZ?:number;connector?:BallJoint;metadata?:NodeMetadata;tag?:JointTag};
+export type Joint={id:number;x:number;y:number;z:number;r:number;shape?:'sphere'|'box'|'cylinder';rotationZ?:number;flatten?:number;scaleX?:number;scaleY?:number;scaleZ?:number;connector?:BallJoint;metadata?:NodeMetadata;tag?:JointTag};
 export type Edge=[number,number];
 const corners:[[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]]=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
 const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
@@ -20,9 +20,9 @@ export function makeBodyField(joints:Joint[],edges:Edge[]){
   for(const [a,b] of links){const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z,den=dx*dx+dy*dy+dz*dz;
    const t=den?Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy+(z-a.z)*dz)/den)):0;
    const sx=(a.scaleX??1)+((b.scaleX??1)-(a.scaleX??1))*t,sy=(a.scaleY??1)+((b.scaleY??1)-(a.scaleY??1))*t,az=a.scaleZ??a.flatten??1,bz=b.scaleZ??b.flatten??1,sz=az+(bz-az)*t;
-   const px=(x-a.x-dx*t)/sx,py=(y-a.y-dy*t)/sy,pz=(z-a.z-dz*t)/sz,r=a.r+(b.r-a.r)*t,da=primitiveDistance(px,py,pz,r,a.shape??'sphere'),db=primitiveDistance(px,py,pz,r,b.shape??'sphere');consider((da+(db-da)*t)*Math.min(sx,sy,sz));
+   const angleA=a.rotationZ??0,angleB=b.rotationZ??0,delta=Math.atan2(Math.sin(angleB-angleA),Math.cos(angleB-angleA)),angle=angleA+delta*t,cos=Math.cos(angle),sin=Math.sin(angle),rx=x-a.x-dx*t,ry=y-a.y-dy*t,px=(cos*rx+sin*ry)/sx,py=(-sin*rx+cos*ry)/sy,pz=(z-a.z-dz*t)/sz,r=a.r+(b.r-a.r)*t,da=primitiveDistance(px,py,pz,r,a.shape??'sphere'),db=primitiveDistance(px,py,pz,r,b.shape??'sphere');consider((da+(db-da)*t)*Math.min(sx,sy,sz));
   }
-  for(const j of isolated){const sx=j.scaleX??1,sy=j.scaleY??1,sz=j.scaleZ??j.flatten??1;consider(primitiveDistance((x-j.x)/sx,(y-j.y)/sy,(z-j.z)/sz,j.r,j.shape??'sphere')*Math.min(sx,sy,sz))}
+  for(const j of isolated){const sx=j.scaleX??1,sy=j.scaleY??1,sz=j.scaleZ??j.flatten??1,cos=Math.cos(j.rotationZ??0),sin=Math.sin(j.rotationZ??0),rx=x-j.x,ry=y-j.y;consider(primitiveDistance((cos*rx+sin*ry)/sx,(-sin*rx+cos*ry)/sy,(z-j.z)/sz,j.r,j.shape??'sphere')*Math.min(sx,sy,sz))}
   if(!Number.isFinite(second))return first;
   const k=.14,h=Math.max(k-Math.abs(first-second),0)/k;
   return first-h*h*k*.25;
@@ -34,7 +34,7 @@ export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeom
  // Thin limbs need multiple samples across their diameter, including preview.
  step=Math.min(step,Math.min(...joints.map(j=>j.r))*.75);
  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
- for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k];lo[k]=Math.min(lo[k],v-j.r*([j.scaleX??1,j.scaleY??1,j.scaleZ??j.flatten??1][k])-.3);hi[k]=Math.max(hi[k],v+j.r*([j.scaleX??1,j.scaleY??1,j.scaleZ??j.flatten??1][k])+.3)}
+ for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k],sx=j.scaleX??1,sy=j.scaleY??1,angle=j.rotationZ??0,cos=Math.abs(Math.cos(angle)),sin=Math.abs(Math.sin(angle)),extent=k===0?sx*cos+sy*sin:k===1?sx*sin+sy*cos:j.scaleZ??j.flatten??1;lo[k]=Math.min(lo[k],v-j.r*extent-.3);hi[k]=Math.max(hi[k],v+j.r*extent+.3)}
  const [nx,ny,nz]=lo.map((v,k)=>Math.ceil((hi[k]-v)/step)+1);
  if(nx*ny*nz>700000)throw Error('The smallest joints are too thin for this model size. Increase their radius or shorten the model, then try again.');
  const index=(i:number,j:number,k:number)=>(i*ny+j)*nz+k;
