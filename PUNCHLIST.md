@@ -86,3 +86,11 @@
 - [x] Prototype model-Y volume offsets with hang, center and above presets; retain anchor metadata in projects and copied branches.
 - [ ] Add full 3D/local-axis offsets, direct gizmos, arbitrary pivots and individual blend control.
 - [ ] Align garment fitting, polygroup attribution, connector previews and posing with offset volume centers; validate extreme offsets and intersections.
+
+## 13. Reshape nodes and spline-guided massing
+- [ ] Add non-articulating reshape nodes attached to a bone segment, with position along the segment, offset, cross-section, scale and blend settings. Their transforms must follow the segment when posed without creating additional rig joints.
+- [ ] Add spline-guided chains with editable control points for tails, tentacles, limbs and other forms. Define how joint nodes and non-joint shape controls participate, including branching and endpoint behavior.
+- [ ] Generate a smoothly skinned surface along the curve with interpolated width, depth, cross-section and orientation; provide controls for taper and smooth transitions.
+- [ ] Address curve-frame twisting, tight bends, self-intersections, branch junctions and deliberate hard transitions. Do not imply collision-free or NURBS output without validation.
+- [ ] Support touch and keyboard editing, preview, symmetry, node anchors, undo/redo, serialization, copy/array operations and Buildercraft transfer.
+- [ ] Profile mobile and desktop costs; test pose deformation, save/reopen and editable old projects without changing existing skeleton behavior.
