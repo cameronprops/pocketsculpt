@@ -10,7 +10,8 @@
     "test:mesh": "node tests/run.mjs",
     "test:pose": "node tests/run-pose.mjs",
     "test:tags": "node tests/run-tags.mjs",
-    "test:parts": "node tests/run-parts.mjs"
+    "test:parts": "node tests/run-parts.mjs",
+    "test:surface": "node tests/run-surface.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"

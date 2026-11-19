@@ -4,20 +4,11 @@ export type Joint={id:number;x:number;y:number;z:number;r:number;tag?:JointTag};
 export type Edge=[number,number];
 const corners:[[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]]=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
 const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
-export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeometry{
+export function makeBodyField(joints:Joint[],edges:Edge[]){
  const byId=new Map(joints.map(j=>[j.id,j]));
  const links=edges.map(([a,b])=>[byId.get(a),byId.get(b)]).filter((e):e is [Joint,Joint]=>!!e[0]&&!!e[1]);
  const linked=new Set(links.flatMap(([a,b])=>[a.id,b.id]));const isolated=joints.filter(j=>!linked.has(j.id));
- if(!joints.length)return new THREE.BufferGeometry();
- if(!Number.isFinite(step)||step<=0||joints.some(j=>!Number.isFinite(j.r)||j.r<=0))throw Error('Invalid joint radius or surface detail.');
- // Thin limbs need multiple samples across their diameter, including preview.
- step=Math.min(step,Math.min(...joints.map(j=>j.r))*.75);
- const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
- for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k];lo[k]=Math.min(lo[k],v-j.r-.3);hi[k]=Math.max(hi[k],v+j.r+.3)}
- const [nx,ny,nz]=lo.map((v,k)=>Math.ceil((hi[k]-v)/step)+1);
- if(nx*ny*nz>700000)throw Error('The smallest joints are too thin for this model size. Increase their radius or shorten the model, then try again.');
- const index=(i:number,j:number,k:number)=>(i*ny+j)*nz+k;
- const field=(x:number,y:number,z:number)=>{
+ return (x:number,y:number,z:number)=>{
   // Blend the two closest distinct limbs only. Sequential blending of all
   // joints and bones inflated busy intersections and depended on edge order.
   let first=Infinity,second=Infinity;
@@ -31,6 +22,18 @@ export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeom
   const k=.14,h=Math.max(k-Math.abs(first-second),0)/k;
   return first-h*h*k*.25;
  };
+}
+export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeometry{
+ if(!joints.length)return new THREE.BufferGeometry();
+ if(!Number.isFinite(step)||step<=0||joints.some(j=>!Number.isFinite(j.r)||j.r<=0))throw Error('Invalid joint radius or surface detail.');
+ // Thin limbs need multiple samples across their diameter, including preview.
+ step=Math.min(step,Math.min(...joints.map(j=>j.r))*.75);
+ const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
+ for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k];lo[k]=Math.min(lo[k],v-j.r-.3);hi[k]=Math.max(hi[k],v+j.r+.3)}
+ const [nx,ny,nz]=lo.map((v,k)=>Math.ceil((hi[k]-v)/step)+1);
+ if(nx*ny*nz>700000)throw Error('The smallest joints are too thin for this model size. Increase their radius or shorten the model, then try again.');
+ const index=(i:number,j:number,k:number)=>(i*ny+j)*nz+k;
+ const field=makeBodyField(joints,edges);
  const values=new Float32Array(nx*ny*nz);
  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++)values[index(i,j,k)]=field(lo[0]+i*step,lo[1]+j*step,lo[2]+k*step);
  type P={id:number;x:number;y:number;z:number;v:number};
