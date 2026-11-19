@@ -29,7 +29,7 @@ Sources:
 - [ ] Environment, lights, backgrounds, compositing and image export.
 - [~] JSON save/open, undo/redo, OBJ export: basic; no print validation.
 - [ ] STL export and model validation.
-- [ ] Orbit, zoom, pan and multi-touch parity: pan remains missing.
+- [~] Orbit, zoom and two-finger pan: implemented; gesture feel and full multi-touch parity need device testing.
 
 ## Requested extensions
 - [~] Joint labeling and transfer of unbaked armature branches.
