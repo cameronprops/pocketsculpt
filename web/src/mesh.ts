@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type {JointTag} from './jointTags';
-export type Joint={id:number;x:number;y:number;z:number;r:number;flatten?:number;tag?:JointTag};
+export type Joint={id:number;x:number;y:number;z:number;r:number;flatten?:number;scaleX?:number;scaleY?:number;scaleZ?:number;tag?:JointTag};
 export type Edge=[number,number];
 const corners:[[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]]=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
 const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
@@ -15,10 +15,10 @@ export function makeBodyField(joints:Joint[],edges:Edge[]){
   function consider(d:number){if(d<first){second=first;first=d}else if(d<second)second=d}
   for(const [a,b] of links){const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z,den=dx*dx+dy*dy+dz*dz;
    const t=den?Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy+(z-a.z)*dz)/den)):0;
-   const flat=(a.flatten??1)+((b.flatten??1)-(a.flatten??1))*t;
-   consider((Math.hypot(x-a.x-dx*t,y-a.y-dy*t,(z-a.z-dz*t)/flat)-(a.r+(b.r-a.r)*t))*flat);
+   const sx=(a.scaleX??1)+((b.scaleX??1)-(a.scaleX??1))*t,sy=(a.scaleY??1)+((b.scaleY??1)-(a.scaleY??1))*t,az=a.scaleZ??a.flatten??1,bz=b.scaleZ??b.flatten??1,sz=az+(bz-az)*t;
+   consider((Math.hypot((x-a.x-dx*t)/sx,(y-a.y-dy*t)/sy,(z-a.z-dz*t)/sz)-(a.r+(b.r-a.r)*t))*Math.min(sx,sy,sz));
   }
-  for(const j of isolated)consider((Math.hypot(x-j.x,y-j.y,(z-j.z)/(j.flatten??1))-j.r)*(j.flatten??1));
+  for(const j of isolated){const sx=j.scaleX??1,sy=j.scaleY??1,sz=j.scaleZ??j.flatten??1;consider((Math.hypot((x-j.x)/sx,(y-j.y)/sy,(z-j.z)/sz)-j.r)*Math.min(sx,sy,sz))}
   if(!Number.isFinite(second))return first;
   const k=.14,h=Math.max(k-Math.abs(first-second),0)/k;
   return first-h*h*k*.25;
@@ -30,7 +30,7 @@ export function buildMesh(joints:Joint[],edges:Edge[],step=.17):THREE.BufferGeom
  // Thin limbs need multiple samples across their diameter, including preview.
  step=Math.min(step,Math.min(...joints.map(j=>j.r))*.75);
  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
- for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k];lo[k]=Math.min(lo[k],v-j.r-.3);hi[k]=Math.max(hi[k],v+j.r+.3)}
+ for(const j of joints)for(let k=0;k<3;k++){const v=[j.x,j.y,j.z][k];lo[k]=Math.min(lo[k],v-j.r*([j.scaleX??1,j.scaleY??1,j.scaleZ??j.flatten??1][k])-.3);hi[k]=Math.max(hi[k],v+j.r*([j.scaleX??1,j.scaleY??1,j.scaleZ??j.flatten??1][k])+.3)}
  const [nx,ny,nz]=lo.map((v,k)=>Math.ceil((hi[k]-v)/step)+1);
  if(nx*ny*nz>700000)throw Error('The smallest joints are too thin for this model size. Increase their radius or shorten the model, then try again.');
  const index=(i:number,j:number,k:number)=>(i*ny+j)*nz+k;
