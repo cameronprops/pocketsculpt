@@ -20,7 +20,8 @@
     "test:garment": "node tests/run-garment-openings.mjs",
     "test:sculpt-limit": "node tests/run-sculpt-limit.mjs",
     "test:mesh-validation": "node tests/run-mesh-validation.mjs",
-    "test:node-shape": "node tests/run-node-shape.mjs"
+    "test:node-shape": "node tests/run-node-shape.mjs",
+    "test:polygroups": "node tests/run-polygroups.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"

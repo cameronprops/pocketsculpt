@@ -32,3 +32,11 @@
 - [ ] Reduce unnecessary rebuilds; use adaptive detail and responsive previews.
 - [ ] Verify touch controls, settings, setup and autosave on real devices.
 - [ ] Define Buildercraft interoperability around tested file formats while keeping Pocket Sculpt standalone.
+
+## 6. Polygroups, layers and multiple skeletons
+- [x] Prototype automatic labeled body-face groups and export them as OBJ groups.
+- [ ] Add in-app group visualization, selection, editing, visibility and user-defined boundaries.
+- [ ] Support independent named massing skeletons and surface layers in one project.
+- [ ] Integrate Akeley connectors with group boundaries and independent objects.
+- [ ] Generate clean separated, capped printable parts and validate intersections and wall thickness.
+- [ ] Preserve group assignments during sculpting, remeshing, saving and Buildercraft transfer.
