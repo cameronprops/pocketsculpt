@@ -2,10 +2,12 @@ import * as THREE from 'three';
 import type {NodeMetadata} from './nodeMetadata';
 import type {BallJoint} from './akeley';
 import type {JointTag} from './jointTags';
-export type Joint={id:number;x:number;y:number;z:number;r:number;flatten?:number;scaleX?:number;scaleY?:number;scaleZ?:number;connector?:BallJoint;metadata?:NodeMetadata;tag?:JointTag};
+export type Joint={id:number;x:number;y:number;z:number;r:number;shape?:'sphere'|'box';flatten?:number;scaleX?:number;scaleY?:number;scaleZ?:number;connector?:BallJoint;metadata?:NodeMetadata;tag?:JointTag};
 export type Edge=[number,number];
 const corners:[[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]]=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
 const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
+/** Model-axis aligned node primitive distance in normalized coordinates. */
+function primitiveDistance(x:number,y:number,z:number,r:number,shape:'sphere'|'box'):number{if(shape==='sphere')return Math.hypot(x,y,z)-r;const a=Math.abs(x)-r,b=Math.abs(y)-r,c=Math.abs(z)-r;return Math.hypot(Math.max(a,0),Math.max(b,0),Math.max(c,0))+Math.min(Math.max(a,b,c),0)}
 export function makeBodyField(joints:Joint[],edges:Edge[]){
  const byId=new Map(joints.map(j=>[j.id,j]));
  const links=edges.map(([a,b])=>[byId.get(a),byId.get(b)]).filter((e):e is [Joint,Joint]=>!!e[0]&&!!e[1]);
@@ -18,9 +20,9 @@ export function makeBodyField(joints:Joint[],edges:Edge[]){
   for(const [a,b] of links){const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z,den=dx*dx+dy*dy+dz*dz;
    const t=den?Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy+(z-a.z)*dz)/den)):0;
    const sx=(a.scaleX??1)+((b.scaleX??1)-(a.scaleX??1))*t,sy=(a.scaleY??1)+((b.scaleY??1)-(a.scaleY??1))*t,az=a.scaleZ??a.flatten??1,bz=b.scaleZ??b.flatten??1,sz=az+(bz-az)*t;
-   consider((Math.hypot((x-a.x-dx*t)/sx,(y-a.y-dy*t)/sy,(z-a.z-dz*t)/sz)-(a.r+(b.r-a.r)*t))*Math.min(sx,sy,sz));
+   const px=(x-a.x-dx*t)/sx,py=(y-a.y-dy*t)/sy,pz=(z-a.z-dz*t)/sz,r=a.r+(b.r-a.r)*t,da=primitiveDistance(px,py,pz,r,a.shape??'sphere'),db=primitiveDistance(px,py,pz,r,b.shape??'sphere');consider((da+(db-da)*t)*Math.min(sx,sy,sz));
   }
-  for(const j of isolated){const sx=j.scaleX??1,sy=j.scaleY??1,sz=j.scaleZ??j.flatten??1;consider((Math.hypot((x-j.x)/sx,(y-j.y)/sy,(z-j.z)/sz)-j.r)*Math.min(sx,sy,sz))}
+  for(const j of isolated){const sx=j.scaleX??1,sy=j.scaleY??1,sz=j.scaleZ??j.flatten??1;consider(primitiveDistance((x-j.x)/sx,(y-j.y)/sy,(z-j.z)/sz,j.r,j.shape??'sphere')*Math.min(sx,sy,sz))}
   if(!Number.isFinite(second))return first;
   const k=.14,h=Math.max(k-Math.abs(first-second),0)/k;
   return first-h*h*k*.25;
