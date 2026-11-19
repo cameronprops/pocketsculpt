@@ -22,7 +22,8 @@
     "test:mesh-validation": "node tests/run-mesh-validation.mjs",
     "test:node-shape": "node tests/run-node-shape.mjs",
     "test:polygroups": "node tests/run-polygroups.mjs",
-    "test:measurement": "node tests/run-measurement.mjs"
+    "test:measurement": "node tests/run-measurement.mjs",
+    "test:history": "node tests/run-history.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"

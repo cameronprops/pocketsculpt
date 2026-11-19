@@ -5,7 +5,7 @@ Derived from the supplied engineering brief. A checked item requires its stated 
 ## P0: Stable sculpting
 - [ ] P0-01: Audit mesh, winding, normals, undo and brush root causes. Partial audit documented; reproduce all reported failures.
 - [ ] P0-02: Mesh diagnostics for invalid data, degenerate/collapsed faces and edges, winding, boundaries and non-manifold geometry. Utility and tests exist; integrate where appropriate and distinguish intentional open surfaces.
-- [ ] P0-03: Transactional deformations with safe rollback and undo. Carve, Sharpen, Build, Flatten, Smooth and Grab use local triangle-orientation guards; full transaction, self-intersection and all failure-path tests remain.
+- [ ] P0-03: Transactional deformations with safe rollback and undo. Carve, Sharpen, Build, Flatten, Smooth and Grab use local triangle-orientation guards; snapshot undo/redo and no-op behavior have automated coverage; interactive cancellation, self-intersection and broader failure-path tests remain.
 - [ ] P0-04: Limit stroke displacement against local edge length and curvature; test repeated strong and small-radius strokes. Partial: per-update displacement is capped against local mean edge length; curvature and complete repeated-stroke coverage remain.
 - [ ] P0-05: Evaluate localized adaptive remeshing, including split/collapse/flip/relax and attributes.
 - [ ] P0-06: Evaluate non-shrinking smoothing and volume behavior.
