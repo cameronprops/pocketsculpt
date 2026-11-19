@@ -2,7 +2,7 @@
 
 ## 1. Make garment surfaces usable
 - [x] Add experimental connected fitted surfaces for shirt, jacket and pants presets.
-- [ ] Define openings at neck, cuffs, waist and ankles; produce consistent thickness and connected seam boundaries.
+- [ ] Define clean openings at neck, cuffs, waist and ankles; remove ragged edges and validate all body variants. Default balanced-maquette jacket/shirt accidental small holes are filtered; broad pants can still have extra openings.
 - [ ] Keep each garment independent, selectable, editable and exportable; allow sculpting and fitting after body edits.
 - [ ] Prevent body intersections, support adjustment and review on phone; measure performance and mesh integrity.
 - [ ] Add drape, accessories and garment layers after fitted shells are reliable.

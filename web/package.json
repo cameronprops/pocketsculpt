@@ -16,7 +16,8 @@
     "test:sharpen": "node tests/run-sharpen.mjs",
     "test:navigation": "node tests/run-navigation.mjs",
     "test:metadata": "node tests/run-metadata.mjs",
-    "bench:mesh": "node tests/run-benchmark.mjs"
+    "bench:mesh": "node tests/run-benchmark.mjs",
+    "test:garment": "node tests/run-garment-openings.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"
