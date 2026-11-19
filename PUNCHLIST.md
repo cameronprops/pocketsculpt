@@ -63,3 +63,13 @@
 - [ ] Add thumbnails, rename/delete, per-project autosave and reliable project management.
 - [ ] Add a versioned public template catalog with attribution, licensing, preview, import validation and explicit publishing controls.
 - [ ] Test IndexedDB and file opening on each supported browser and document storage limitations.
+
+## 10. Parts, assemblies and desktop controls
+- [x] Prototype a parts browser that lists the current skeleton, selectable joints, body and shell objects.
+- [x] Add a basic desktop command bar and undo, redo, save, copy and paste shortcuts for skeleton branches.
+- [ ] Add actual object selection for meshes and shells; independently editable objects and assemblies.
+- [ ] Implement layers as independent named groupings with assignments, visibility, locking and project persistence.
+- [ ] Add multiple independent skeletons, assembly hierarchy and cross-workspace interchange.
+- [ ] Add complete discoverable, configurable shortcuts, command history, aliases and help.
+- [ ] Evaluate sharing a Rust desktop modeling core with Buildercraft; keep the responsive web app working.
+- [ ] Keep browser delivery shareable and standalone; evaluate Rust compiled to WebAssembly for measured geometry and memory bottlenecks, with explicit interoperability and benchmark tests.
