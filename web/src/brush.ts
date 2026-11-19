@@ -36,3 +36,11 @@ export function brushRegion(g:THREE.BufferGeometry,face:{a:number;b:number;c:num
  for(let head=0;head<queue.length;head++){const i=queue[head];for(const v of neighbors[i]){if(mask[v])continue;const dy=p.getY(v)-point.y,dz=p.getZ(v)-point.z,dx=p.getX(v)-point.x,mdx=p.getX(v)+point.x;if(dx*dx+dy*dy+dz*dz<=radius*radius||(mirror&&mdx*mdx+dy*dy+dz*dz<=radius*radius))visit(v)}}
  return mask;
 }
+
+/** Normal-only unsharp displacement, bounded to limit spikes. */
+export function sharpenAmount(x:number,y:number,z:number,nx:number,ny:number,nz:number,meanX:number,meanY:number,meanZ:number,strength:number,weight:number,radius:number):number{
+ const difference=(x-meanX)*nx+(y-meanY)*ny+(z-meanZ)*nz;
+ const value=difference*Math.min(.45,Math.max(0,strength)*3)*Math.max(0,Math.min(1,weight));
+ const limit=Math.max(0,radius)*.015;
+ return Math.max(-limit,Math.min(limit,value));
+}

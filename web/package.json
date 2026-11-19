@@ -12,7 +12,8 @@
     "test:tags": "node tests/run-tags.mjs",
     "test:parts": "node tests/run-parts.mjs",
     "test:surface": "node tests/run-surface.mjs",
-    "test:grab": "node tests/run-grab.mjs"
+    "test:grab": "node tests/run-grab.mjs",
+    "test:sharpen": "node tests/run-sharpen.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"

@@ -14,8 +14,8 @@ Sources:
 - [~] Bake: generates a sculptable triangle mesh; quality/performance not yet at target.
 
 ## Sculpt
-- [~] Out, In, Smooth, Flatten and Grab: implemented, require device and behavior validation.
-- [ ] Sharpen and its behavior.
+- [~] Out, In, Smooth, Sharpen, Flatten and Grab: implemented, require device and behavior validation.
+- [~] Sharpen: initial normal-based tool; requires device and behavior validation.
 - [~] Brush size, strength and symmetry: basic controls.
 
 ## Paint and image rub
