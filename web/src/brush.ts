@@ -44,3 +44,8 @@ export function sharpenAmount(x:number,y:number,z:number,nx:number,ny:number,nz:
  const limit=Math.max(0,radius)*.015;
  return Math.max(-limit,Math.min(limit,value));
 }
+
+/** Pull surface points tangentially toward the stroke to form a controlled crease. */
+export function sharpenPinch(x:number,y:number,z:number,nx:number,ny:number,nz:number,point:THREE.Vector3,mirror:boolean,strength:number,weight:number,radius:number):[number,number,number]{
+ const px=mirror&&Math.hypot(x+point.x,y-point.y,z-point.z)<Math.hypot(x-point.x,y-point.y,z-point.z)?-point.x:point.x;const dx=px-x,dy=point.y-y,dz=point.z-z,dot=dx*nx+dy*ny+dz*nz;let tx=dx-dot*nx,ty=dy-dot*ny,tz=dz-dot*nz;const len=Math.hypot(tx,ty,tz);if(!len||radius<=0)return [x,y,z];const step=Math.min(len,Math.max(0,radius)*.006,Math.max(0,strength)*.06*Math.max(0,weight));tx*=step/len;ty*=step/len;tz*=step/len;return [x+tx,y+ty,z+tz];
+}
