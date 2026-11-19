@@ -40,3 +40,12 @@
 - [ ] Integrate Akeley connectors with group boundaries and independent objects.
 - [ ] Generate clean separated, capped printable parts and validate intersections and wall thickness.
 - [ ] Preserve group assignments during sculpting, remeshing, saving and Buildercraft transfer.
+
+## 7. Precision and hard-surface modeling
+- [x] Prototype a saved millimeters-per-model-unit export scale and optional joint-position snapping.
+- [x] Add selectable angle increments for the existing node Z-rotation slider.
+- [ ] Add scene measurements, unit display and entry in inches, millimeters and other units.
+- [ ] Add visible grids, snapping to points, edges and surfaces, axis constraints, and configurable origins.
+- [ ] Add precise three-axis transforms and numeric entry, rotation pivots, and angle snapping for posing.
+- [ ] Add hard-surface booleans, clean edges, bevels and precision validation; test printable output.
+- [ ] Reconcile project scale with Akeley connector insertion once body splitting is implemented.
