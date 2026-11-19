@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type {JointTag} from './jointTags';
-export type Joint={id:number;x:number;y:number;z:number;r:number;tag?:JointTag};
+export type Joint={id:number;x:number;y:number;z:number;r:number;flatten?:number;tag?:JointTag};
 export type Edge=[number,number];
 const corners:[[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]]=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
 const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
@@ -15,9 +15,10 @@ export function makeBodyField(joints:Joint[],edges:Edge[]){
   function consider(d:number){if(d<first){second=first;first=d}else if(d<second)second=d}
   for(const [a,b] of links){const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z,den=dx*dx+dy*dy+dz*dz;
    const t=den?Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy+(z-a.z)*dz)/den)):0;
-   consider(Math.hypot(x-a.x-dx*t,y-a.y-dy*t,z-a.z-dz*t)-(a.r+(b.r-a.r)*t));
+   const flat=(a.flatten??1)+((b.flatten??1)-(a.flatten??1))*t;
+   consider((Math.hypot(x-a.x-dx*t,y-a.y-dy*t,(z-a.z-dz*t)/flat)-(a.r+(b.r-a.r)*t))*flat);
   }
-  for(const j of isolated)consider(Math.hypot(x-j.x,y-j.y,z-j.z)-j.r);
+  for(const j of isolated)consider((Math.hypot(x-j.x,y-j.y,(z-j.z)/(j.flatten??1))-j.r)*(j.flatten??1));
   if(!Number.isFinite(second))return first;
   const k=.14,h=Math.max(k-Math.abs(first-second),0)/k;
   return first-h*h*k*.25;

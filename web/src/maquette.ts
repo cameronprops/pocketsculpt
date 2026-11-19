@@ -3,8 +3,8 @@ import type {JointTag} from './jointTags';
 export type Silhouette='balanced'|'broad'|'curved';
 /** Editable artist's mannequin proportions, with neck, limb joints, hands and feet. */
 export function maquette(shape:Silhouette,arms:boolean,fingers=false):{joints:Joint[];edges:Edge[]}{
- const shoulder=shape==='broad'?.49:shape==='curved'?.38:.43,hip=shape==='curved'?.27:shape==='broad'?.21:.24;
- const pts=[[0,0,0,.22],[0,.64,0,shape==='broad'?.26:.23],[0,1.28,0,.155],[-shoulder,.61,0,.12],[-shoulder-.16,.20,0,.105],[shoulder,.61,0,.12],[shoulder+.16,.20,0,.105],[-hip,-.67,0,.145],[-hip,-1.30,0,.095],[hip,-.67,0,.145],[hip,-1.30,0,.095],[0,.99,0,.075],[-shoulder-.27,-.18,0,.075],[-shoulder-.30,-.34,.025,.095],[shoulder+.27,-.18,0,.075],[shoulder+.30,-.34,.025,.095],[-hip,-1.37,.18,.09],[hip,-1.37,.18,.09],[-hip,-.14,0,.15],[hip,-.14,0,.14],[0,1.46,0,.14],[0,.28,0,.19]];
+ const shoulder=shape==='broad'?.46:shape==='curved'?.36:.41,hip=shape==='curved'?.27:shape==='broad'?.21:.24;
+ const pts=[[0,0,0,.20],[0,.66,0,shape==='broad'?.23:.21],[0,1.36,0,.145],[-shoulder,.61,0,.12],[-shoulder-.12,.19,0,.09],[shoulder,.61,0,.12],[shoulder+.12,.19,0,.09],[-hip,-.79,0,.12],[-hip,-1.48,0,.09],[hip,-.79,0,.12],[hip,-1.48,0,.09],[0,1.03,0,.075],[-shoulder-.18,-.27,0,.075],[-shoulder-.20,-.46,.025,.085],[shoulder+.18,-.27,0,.075],[shoulder+.20,-.46,.025,.085],[-hip,-1.54,.18,.09],[hip,-1.54,.18,.09],[-hip,-.14,0,.15],[hip,-.14,0,.14],[0,1.53,0,.14],[0,.31,0,.17]];
  const edges:Edge[]=[[0,21],[21,1],[1,11],[11,2],[2,20],[1,3],[3,4],[4,12],[12,13],[1,5],[5,6],[6,14],[14,15],[0,18],[18,7],[7,8],[8,16],[0,19],[19,9],[9,10],[10,17]];
  const tags:JointTag[]=[
   {role:'root',side:'center',part:'torso',direction:'+y'},{role:'torso',side:'center',part:'torso',direction:'+y'},{role:'head',side:'center',part:'head',direction:'+y'},
