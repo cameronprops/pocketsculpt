@@ -56,3 +56,10 @@
 - [ ] Implement and verify direct Buildercraft scene import with actual project fixtures.
 - [ ] Establish browser-capable Buildercraft host and rendering strategy; do not assume the current desktop alpha is already a web app.
 - [ ] Test mouse/keyboard, touch and pen at desktop, tablet and phone widths, including performance tiers and local/offline behavior.
+
+## 9. Project and template gallery
+- [x] Startup entry points for current autosave, project file, built-in starter setup and locally saved project/template snapshots.
+- [x] Export portable template JSON for manual sharing through Git.
+- [ ] Add thumbnails, rename/delete, per-project autosave and reliable project management.
+- [ ] Add a versioned public template catalog with attribution, licensing, preview, import validation and explicit publishing controls.
+- [ ] Test IndexedDB and file opening on each supported browser and document storage limitations.
