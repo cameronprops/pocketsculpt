@@ -1,3 +1,4 @@
+import {validNodeMetadata} from './nodeMetadata';
 import {guardDeformation} from './deformationGuard';
 import {jointEditWeight} from './jointProtection';
 import {fittedGarment} from './fittedGarment';
@@ -49,6 +50,7 @@ function restore(s:string){
  const v=d as {joints?:unknown;edges?:unknown;selected?:unknown;stage?:unknown;sculptPositions?:unknown;sculptIndices?:unknown;sculptColors?:unknown;shells?:unknown;fitted?:unknown};
  if(!Array.isArray(v.joints)||!Array.isArray(v.edges)||v.joints.length<1||v.joints.length>500||v.edges.length>1000)throw Error('Invalid project size');
  if(!v.joints.every((j:unknown)=>{if(!j||typeof j!=='object')return false;const a=j as Record<string,unknown>;return ['x','y','z','r','id'].every(k=>typeof a[k]==='number'&&Number.isFinite(a[k]))&&Number.isSafeInteger(a.id)&&Number(a.id)>=0&&Number(a.r)>=.01&&Number(a.r)<=10&&['x','y','z'].every(k=>Math.abs(Number(a[k]))<=100)}))throw Error('Invalid joint data');
+ if(v.joints.some((j:unknown)=>{const m=(j as {metadata?:unknown}).metadata;return m!==undefined&&!validNodeMetadata(m)}))throw Error('Invalid node metadata');
  if(v.joints.some((j:unknown)=>{const c=(j as {connector?:unknown}).connector;return c!==undefined&&!validBallJoint(c)}))throw Error('Invalid connector data');
  if(v.joints.some((j:unknown)=>['scaleX','scaleY','scaleZ'].some(k=>{const n=(j as Record<string,unknown>)[k];return n!==undefined&&(typeof n!=='number'||!Number.isFinite(n)||n<.35||n>2)})))throw Error('Invalid node scale');
  if(v.joints.some((j:unknown)=>{const f=(j as {flatten?:unknown}).flatten;return f!==undefined&&(typeof f!=='number'||!Number.isFinite(f)||f<.35||f>1)}))throw Error('Invalid node depth');

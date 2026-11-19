@@ -14,7 +14,9 @@
     "test:surface": "node tests/run-surface.mjs",
     "test:grab": "node tests/run-grab.mjs",
     "test:sharpen": "node tests/run-sharpen.mjs",
-    "test:navigation": "node tests/run-navigation.mjs"
+    "test:navigation": "node tests/run-navigation.mjs",
+    "test:metadata": "node tests/run-metadata.mjs",
+    "bench:mesh": "node tests/run-benchmark.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"
