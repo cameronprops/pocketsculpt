@@ -23,7 +23,8 @@
     "test:node-shape": "node tests/run-node-shape.mjs",
     "test:polygroups": "node tests/run-polygroups.mjs",
     "test:measurement": "node tests/run-measurement.mjs",
-    "test:history": "node tests/run-history.mjs"
+    "test:history": "node tests/run-history.mjs",
+    "test:reshape": "node tests/run-reshape.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"

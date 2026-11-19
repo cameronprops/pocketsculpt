@@ -1,0 +1,5 @@
+import type {Joint,Edge} from './mesh';
+export type Reshape={parent:number;child:number;t:number;r:number;anchorY:number};
+export function validReshape(x:unknown,edges:Edge[]):x is Reshape{if(!x||typeof x!=='object')return false;const q=x as Reshape;return Number.isSafeInteger(q.parent)&&Number.isSafeInteger(q.child)&&edges.some(e=>e[0]===q.parent&&e[1]===q.child)&&Number.isFinite(q.t)&&q.t>=.1&&q.t<=.9&&Number.isFinite(q.r)&&q.r>=.06&&q.r<=.7&&Number.isFinite(q.anchorY)&&Math.abs(q.anchorY)<=1.5}
+/** Insert temporary surface controls, leaving the editable rig and its joint IDs untouched. */
+export function expandForSurface(joints:Joint[],edges:Edge[],controls:Reshape[]):{joints:Joint[];edges:Edge[]}{const byId=new Map(joints.map(j=>[j.id,j])),result=joints.map(j=>({...j})),out:Edge[]=[];let next=Math.max(-1,...joints.map(j=>j.id))+1;for(const [a,b] of edges){const c=controls.find(q=>q.parent===a&&q.child===b),A=byId.get(a),B=byId.get(b);if(!c||!A||!B){out.push([a,b]);continue}const t=c.t,j:Joint={id:next++,x:A.x+(B.x-A.x)*t,y:A.y+(B.y-A.y)*t,z:A.z+(B.z-A.z)*t,r:c.r,anchorY:c.anchorY};result.push(j);out.push([a,j.id],[j.id,b])}return {joints:result,edges:out}}
