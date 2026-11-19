@@ -88,7 +88,7 @@
 - [ ] Align garment fitting, polygroup attribution, connector previews and posing with offset volume centers; validate extreme offsets and intersections.
 
 ## 13. Reshape nodes and spline-guided massing
-- [ ] Add non-articulating reshape nodes attached to a bone segment, with position along the segment, offset, cross-section, scale and blend settings. Partial: one surface-only control per bone with position, radius and model-Y offset; follows bone endpoints while posing. Symmetry, copying and local axes remain.
+- [ ] Add non-articulating reshape nodes attached to a bone segment, with position along the segment, offset, cross-section, scale and blend settings. Partial: one surface-only control per bone with position, radius and model-Y offset; follows bone endpoints while posing. Symmetric edits and branch copying are supported. Local axes, additional controls per bone and spline editing remain.
 - [ ] Add spline-guided chains with editable control points for tails, tentacles, limbs and other forms. Define how joint nodes and non-joint shape controls participate, including branching and endpoint behavior.
 - [ ] Generate a smoothly skinned surface along the curve with interpolated width, depth, cross-section and orientation; provide controls for taper and smooth transitions.
 - [ ] Address curve-frame twisting, tight bends, self-intersections, branch junctions and deliberate hard transitions. Do not imply collision-free or NURBS output without validation.
