@@ -1,4 +1,4 @@
-export const roles=['standard','root','torso','head','hand','foot','neck','shoulder','elbow','wrist','hip','knee','ankle','wing_root','tail_root'] as const;
+export const roles=['standard','root','torso','head','hand','finger','foot','neck','shoulder','elbow','wrist','hip','knee','ankle','wing_root','tail_root'] as const;
 export const sides=['unspecified','center','left','right'] as const;
 export const parts=['unassigned','torso','head','arm','leg','wing','tail','other'] as const;
 export const directions=['unspecified','+x','-x','+y','-y','+z','-z'] as const;
