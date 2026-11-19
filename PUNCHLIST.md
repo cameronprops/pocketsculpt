@@ -8,7 +8,7 @@
 - [ ] Add drape, accessories and garment layers after fitted shells are reliable.
 
 ## 2. Akeley’s Tool: posable figures
-- [x] Make Akeley’s Tool visible in the top toolbar in skeleton mode.
+- [x] Make Akeley’s Tool visible in the top toolbar, including access to connector assignments in sculpt mode without discarding sculpt edits.
 - [x] Assign ball-joint settings to a node and export a standalone ball/socket fit test.
 - [ ] Show connector orientation and dimensions on the model. Assigned nodes now have a pink marker.
 - [ ] Split a sculpt into parts at a selected joint and generate matching connector geometry.
