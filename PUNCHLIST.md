@@ -49,3 +49,10 @@
 - [ ] Add precise three-axis transforms and numeric entry, rotation pivots, and angle snapping for posing.
 - [ ] Add hard-surface booleans, clean edges, bevels and precision validation; test printable output.
 - [ ] Reconcile project scale with Akeley connector insertion once body splitting is implemented.
+
+## 8. Buildercraft web workspace
+- [ ] Make Pocket Sculpt a responsive Buildercraft suite workspace while retaining standalone use.
+- [ ] Define a versioned transfer contract for scale, axes, geometry, materials, node metadata and unsupported features.
+- [ ] Implement and verify direct Buildercraft scene import with actual project fixtures.
+- [ ] Establish browser-capable Buildercraft host and rendering strategy; do not assume the current desktop alpha is already a web app.
+- [ ] Test mouse/keyboard, touch and pen at desktop, tablet and phone widths, including performance tiers and local/offline behavior.
