@@ -73,3 +73,11 @@
 - [ ] Add complete discoverable, configurable shortcuts, command history, aliases and help.
 - [ ] Evaluate sharing a Rust desktop modeling core with Buildercraft; keep the responsive web app working.
 - [ ] Keep browser delivery shareable and standalone; evaluate Rust compiled to WebAssembly for measured geometry and memory bottlenecks, with explicit interoperability and benchmark tests.
+
+## 11. Revolve and arrays for skeletons and parts
+- [ ] Add radial arrays of a selected skeleton branch, whole skeleton, or eligible part around a selectable axis and pivot. Controls: number of instances, total angle or angular spacing, direction, and whether the source counts as an instance.
+- [ ] Add linear arrays with count, direction and spacing; evaluate arrays along a user-defined path.
+- [ ] Provide a live preview, numeric entry, angle snapping and touch-accessible controls; support the command line on desktop and attached keyboards.
+- [ ] Preserve node labels, shape settings, connector metadata, layers and hierarchy when duplicating. Define unique IDs and explicitly handle symmetry, overlapping instances and attachment behavior.
+- [ ] Make the operation one undoable action and validate save/reopen, export and Buildercraft transfer. Define whether instances are linked or independent before exposing either mode.
+- [ ] Evaluate a separate geometric revolve operation for producing a surface or solid from a profile; distinguish it from radial duplication of skeletons and parts.
