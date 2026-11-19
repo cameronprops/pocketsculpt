@@ -1,7 +1,7 @@
 # Pocket Sculpt punch list
 
 ## 1. Make garment surfaces usable
-- [ ] Replace separate preset tubes with one fitted, connected surface for shirts, jackets and pants.
+- [x] Add experimental connected fitted surfaces for shirt, jacket and pants presets.
 - [ ] Define openings at neck, cuffs, waist and ankles; produce consistent thickness and connected seam boundaries.
 - [ ] Keep each garment independent, selectable, editable and exportable; allow sculpting and fitting after body edits.
 - [ ] Prevent body intersections, support adjustment and review on phone; measure performance and mesh integrity.
@@ -10,7 +10,7 @@
 ## 2. Akeley’s Tool: posable figures
 - [x] Make Akeley’s Tool visible in the top toolbar in skeleton mode.
 - [x] Assign ball-joint settings to a node and export a standalone ball/socket fit test.
-- [ ] Show assigned connector positions, orientation and dimensions on the model.
+- [ ] Show connector orientation and dimensions on the model. Assigned nodes now have a pink marker.
 - [ ] Split a sculpt into parts at a selected joint and generate matching connector geometry.
 - [ ] Add hinges, pegs and interchangeable parts; validate wall thickness and fit.
 - [ ] Test physical prints for material, tolerances, retention and durability.

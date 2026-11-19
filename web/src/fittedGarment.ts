@@ -1,0 +1,17 @@
+import * as THREE from 'three';
+import type {Joint,Edge} from './mesh';
+import type {Shell} from './garment';
+/** Build a thickened subset of the body surface, selected by nearest skeleton bone. */
+export function fittedGarment(body:THREE.BufferGeometry,joints:Joint[],edges:Edge[],pieces:Shell[]):THREE.BufferGeometry {
+ const p=body.getAttribute('position'),norm=body.getAttribute('normal'),idx=body.getIndex();if(!p||!norm||!idx)throw Error('Body surface is unavailable');
+ const byId=new Map(joints.map(j=>[j.id,j])),chosen=new Set(pieces.map(s=>`${s.a},${s.b}`));const bones=edges.map(([a,b])=>({a:byId.get(a),b:byId.get(b),selected:chosen.has(`${a},${b}`)})).filter(q=>q.a&&q.b);if(!bones.length)throw Error('No garment bones');
+ let faces:number[]=[];const selectedVerts=new Set<number>(),boundary=new Map<string,{a:number;b:number;count:number}>();
+ for(let k=0;k<idx.count;k+=3){const a=idx.getX(k),b=idx.getX(k+1),c=idx.getX(k+2),x=(p.getX(a)+p.getX(b)+p.getX(c))/3,y=(p.getY(a)+p.getY(b)+p.getY(c))/3,z=(p.getZ(a)+p.getZ(b)+p.getZ(c))/3;let best=Infinity,include=false;for(const bone of bones){const A=bone.a!,B=bone.b!,dx=B.x-A.x,dy=B.y-A.y,dz=B.z-A.z,den=dx*dx+dy*dy+dz*dz,t=den?Math.max(0,Math.min(1,((x-A.x)*dx+(y-A.y)*dy+(z-A.z)*dz)/den)):0;const d=Math.hypot(x-A.x-t*dx,y-A.y-t*dy,z-A.z-t*dz)-(A.r+(B.r-A.r)*t);if(d<best){best=d;include=bone.selected}}if(!include)continue;faces.push(a,b,c);selectedVerts.add(a);selectedVerts.add(b);selectedVerts.add(c);for(const [u,v] of [[a,b],[b,c],[c,a]]){const key=u<v?`${u},${v}`:`${v},${u}`,q=boundary.get(key);if(q)q.count++;else boundary.set(key,{a:u,b:v,count:1})}}
+ if(!faces.length)throw Error('No surface found for this garment');
+ // Discard tiny detached patches produced by nearest-bone classification.
+ const parent=new Map<number,number>();for(const id of selectedVerts)parent.set(id,id);function root(x:number):number{let y=x;while(parent.get(y)!==y)y=parent.get(y)!;while(parent.get(x)!==x){const next=parent.get(x)!;parent.set(x,y);x=next}return y}for(let k=0;k<faces.length;k+=3){const a=root(faces[k]);parent.set(root(faces[k+1]),a);parent.set(root(faces[k+2]),a)}const sizes=new Map<number,number>();for(const id of selectedVerts){const r=root(id);sizes.set(r,(sizes.get(r)??0)+1)}const largest=[...sizes].sort((a,b)=>b[1]-a[1])[0][0];const kept:number[]=[];for(let k=0;k<faces.length;k+=3)if(root(faces[k])===largest)kept.push(faces[k],faces[k+1],faces[k+2]);faces=kept;selectedVerts.clear();boundary.clear();for(let k=0;k<faces.length;k+=3){const a=faces[k],b=faces[k+1],c=faces[k+2];selectedVerts.add(a);selectedVerts.add(b);selectedVerts.add(c);for(const [u,v] of [[a,b],[b,c],[c,a]]){const key=u<v?`${u},${v}`:`${v},${u}`,q=boundary.get(key);if(q)q.count++;else boundary.set(key,{a:u,b:v,count:1})}}
+ const ids=[...selectedVerts],remap=new Map(ids.map((id,i)=>[id,i])),positions:number[]=[],out:number[]=[],gap=pieces[0].gap,thickness=pieces[0].thickness;
+ for(const offset of [gap+thickness,gap])for(const i of ids)positions.push(p.getX(i)+norm.getX(i)*offset,p.getY(i)+norm.getY(i)*offset,p.getZ(i)+norm.getZ(i)*offset);
+ const n=ids.length;for(let k=0;k<faces.length;k+=3){const a=remap.get(faces[k])!,b=remap.get(faces[k+1])!,c=remap.get(faces[k+2])!;out.push(a,b,c,c+n,b+n,a+n)}for(const e of boundary.values())if(e.count===1){const a=remap.get(e.a)!,b=remap.get(e.b)!;out.push(b,a,a+n,b,a+n,b+n)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(out);g.computeVertexNormals();return g;
+}
