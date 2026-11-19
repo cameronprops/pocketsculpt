@@ -18,7 +18,8 @@
     "test:metadata": "node tests/run-metadata.mjs",
     "bench:mesh": "node tests/run-benchmark.mjs",
     "test:garment": "node tests/run-garment-openings.mjs",
-    "test:sculpt-limit": "node tests/run-sculpt-limit.mjs"
+    "test:sculpt-limit": "node tests/run-sculpt-limit.mjs",
+    "test:mesh-validation": "node tests/run-mesh-validation.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"

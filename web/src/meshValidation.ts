@@ -1,0 +1,9 @@
+import * as THREE from 'three';
+export type MeshReport={invalidPositions:number;invalidIndices:number;degenerateFaces:number;collapsedEdges:number;boundaryEdges:number;nonManifoldEdges:number;inconsistentEdges:number};
+/** Topological diagnostics. Boundary edges may be intentional on open surfaces. */
+export function validateMesh(g:THREE.BufferGeometry,epsilon=1e-8):MeshReport{
+ const report:MeshReport={invalidPositions:0,invalidIndices:0,degenerateFaces:0,collapsedEdges:0,boundaryEdges:0,nonManifoldEdges:0,inconsistentEdges:0};const p=g.getAttribute('position'),ix=g.getIndex();if(!p||p.itemSize!==3||!ix||ix.count%3){report.invalidIndices++;return report}
+ for(let i=0;i<p.count;i++)if(![p.getX(i),p.getY(i),p.getZ(i)].every(Number.isFinite))report.invalidPositions++;
+ const edges=new Map<string,{count:number;direction:number}>();for(let k=0;k<ix.count;k+=3){const ids=[ix.getX(k),ix.getX(k+1),ix.getX(k+2)];if(ids.some(i=>!Number.isInteger(i)||i<0||i>=p.count)){report.invalidIndices++;continue}const [a,b,c]=ids;const x1=p.getX(b)-p.getX(a),y1=p.getY(b)-p.getY(a),z1=p.getZ(b)-p.getZ(a),x2=p.getX(c)-p.getX(a),y2=p.getY(c)-p.getY(a),z2=p.getZ(c)-p.getZ(a),area=Math.hypot(y1*z2-z1*y2,z1*x2-x1*z2,x1*y2-y1*x2);if(Number.isFinite(area)&&area<=epsilon*epsilon)report.degenerateFaces++;for(const [u,v] of [[a,b],[b,c],[c,a]]){const key=u<v?`${u},${v}`:`${v},${u}`,prev=edges.get(key)??{count:0,direction:0};prev.count++;prev.direction+=u<v?1:-1;edges.set(key,prev)}}
+ for(const [key,e] of edges){const [a,b]=key.split(',').map(Number);if(Math.hypot(p.getX(a)-p.getX(b),p.getY(a)-p.getY(b),p.getZ(a)-p.getZ(b))<=epsilon)report.collapsedEdges++;if(e.count===1)report.boundaryEdges++;else if(e.count!==2)report.nonManifoldEdges++;else if(e.direction!==0)report.inconsistentEdges++}return report;
+}
