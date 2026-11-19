@@ -81,3 +81,8 @@
 - [ ] Preserve node labels, shape settings, connector metadata, layers and hierarchy when duplicating. Define unique IDs and explicitly handle symmetry, overlapping instances and attachment behavior.
 - [ ] Make the operation one undoable action and validate save/reopen, export and Buildercraft transfer. Define whether instances are linked or independent before exposing either mode.
 - [ ] Evaluate a separate geometric revolve operation for producing a surface or solid from a profile; distinguish it from radial duplication of skeletons and parts.
+
+## 12. Node volume anchors
+- [x] Prototype model-Y volume offsets with hang, center and above presets; retain anchor metadata in projects and copied branches.
+- [ ] Add full 3D/local-axis offsets, direct gizmos, arbitrary pivots and individual blend control.
+- [ ] Align garment fitting, polygroup attribution, connector previews and posing with offset volume centers; validate extreme offsets and intersections.
